@@ -3,7 +3,7 @@
 ## Request flow
 
 ```
-client ──► nginx (rate limit, least_conn) ──► backend replica ×3 (FastAPI)
+browser (React UI) ──► nginx: static UI + /api proxy (rate limit, least_conn) ──► backend replica ×3 (FastAPI)
                                                 │
                                                 ▼
                                    CityInformationAgent (LangChain, OpenAI tools)
@@ -39,10 +39,14 @@ Weather 30 min, time 5 min, facts 2 h. The cache lives in Redis so all replicas 
 **5. Errors are logged in full but returned generic.**
 Clients get `"The assistant could not process this request."`. The stack trace goes to logs. Exception text (which can include upstream URLs or key fragments) is only returned when `DEBUG=true`. Request headers are not logged.
 
+**6. Streaming is unbuffered end to end.**
+The UI reads `POST /api/v1/chat` (`stream: true`) with `fetch` and a stream reader instead of `EventSource`, because `EventSource` can only GET and can't send the conversation history. The backend sets `X-Accel-Buffering: no` so nginx forwards each event as it is produced. `GET /chat/stream` has its own nginx block, marked `^~` so the generic `/api/v1/` regex doesn't override it.
+
 ## Known limitations / next steps
 
 - `/chat/stream` replays the finished answer word by word. True token streaming needs `agent.astream` events. It's marked `shortcut:` in `chat.py`.
 - The streaming endpoint reports zero token usage. The non-streaming endpoint reports real usage via `OpenAICallbackHandler`.
 - `/api/v1/health` calls OpenWeatherMap and GeoDB on every hit. Under a load-balancer health check this spends API quota. It should cache the result or use the plain `/health` liveness probe.
 - Coverage is ~68%. The uncovered parts are mostly the Redis client and the tools' upstream branches.
+- The UI shows the agent's markdown as plain text. A markdown renderer is the next step if answers get richer formatting.
 - Agent is constructed per request (cheap, no I/O). Pool it if profiling shows it matters.

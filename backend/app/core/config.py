@@ -6,10 +6,10 @@ This module handles loading and validating configuration settings from environme
 
 import logging
 from functools import lru_cache
-from typing import List, Optional, Union
+from typing import Annotated, List, Optional, Union
 
 from pydantic import AnyHttpUrl, Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -32,7 +32,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "City Information Assistant API"
 
     # CORS settings
-    BACKEND_CORS_ORIGINS: List[Union[str, AnyHttpUrl]] = Field(
+    # NoDecode: .env holds "a,b"; without it pydantic-settings parses JSON first and crashes at startup.
+    BACKEND_CORS_ORIGINS: Annotated[List[Union[str, AnyHttpUrl]], NoDecode] = Field(
         default=["http://localhost:3000"],
         env="BACKEND_CORS_ORIGINS"
     )
@@ -90,7 +91,7 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    @field_validator("BACKEND_CORS_ORIGINS")
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(
         cls, v: Union[str, List[str]]
