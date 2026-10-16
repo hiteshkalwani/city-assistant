@@ -3,10 +3,15 @@ Root conftest.py for pytest configuration.
 Ensures proper async test support across all test modules.
 """
 
+import os
 import pytest
 import asyncio
 import sys
 from pathlib import Path
+
+# Tests must never need real credentials; set before app settings are imported.
+os.environ.setdefault("OPENAI_API_KEY", "sk-test-not-a-real-key")
+os.environ.setdefault("CACHE_ENABLED", "false")
 
 # Ensure pytest-asyncio is available
 pytest_plugins = ['pytest_asyncio']
@@ -20,8 +25,3 @@ def event_loop():
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
-
-# Configure asyncio mode
-def pytest_configure(config):
-    """Configure pytest with asyncio settings."""
-    config.option.asyncio_mode = "auto"

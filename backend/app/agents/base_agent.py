@@ -6,11 +6,12 @@ implementing common functionality and patterns.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
 from langchain_openai import ChatOpenAI
 from loguru import logger
@@ -50,7 +51,6 @@ class BaseAgent(ABC):
             model=model_name,
             temperature=temperature,
             max_tokens=max_tokens,
-            streaming=True,
         )
         
         # Initialize chat history
@@ -114,12 +114,14 @@ class BaseAgent(ABC):
     async def ainvoke(
         self,
         input_data: Union[str, Dict[str, Any]],
+        config: Optional[RunnableConfig] = None,
         **kwargs,
     ) -> Dict[str, Any]:
         """Asynchronously invoke the agent.
         
         Args:
             input_data: Input to the agent (string or dict)
+            config: Optional LangChain run config (e.g. callbacks for token usage)
             **kwargs: Additional arguments
             
         Returns:
@@ -148,7 +150,7 @@ class BaseAgent(ABC):
         
         try:
             # Execute the agent
-            result = await self.agent_executor.ainvoke(agent_input)
+            result = await self.agent_executor.ainvoke(agent_input, config=config)
             return result
             
         except Exception as e:

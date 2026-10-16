@@ -8,7 +8,6 @@ including health checks, chat functionality, edge cases, and error scenarios.
 import pytest
 import sys
 from pathlib import Path
-from fastapi.testclient import TestClient
 from unittest.mock import patch
 
 # Add the parent directory to Python path to import app modules
@@ -28,13 +27,7 @@ with patch.dict('os.environ', {
     'DEBUG': 'true',
     'ENVIRONMENT': 'test'
 }):
-    from app.main import app
-
-
-@pytest.fixture
-def client():
-    """Create a test client for the FastAPI app."""
-    return TestClient(app)
+    pass
 
 
 class TestHealthEndpoint:
@@ -429,18 +422,11 @@ class TestSecurity:
 
     def test_cors_headers(self, client):
         """Test CORS headers are present."""
-        response = client.options("/api/v1/health")
-        # CORS headers should be present if configured
-        # This test depends on CORS configuration
-
-    def test_security_headers(self, client):
-        """Test security headers."""
-        response = client.get("/health")
-        assert response.status_code == 200
-        
-        # Check for common security headers (if implemented)
-        headers = response.headers
-        # These might not be implemented yet, so we just check they don't break anything
+        response = client.options(
+            "/api/v1/health",
+            headers={"Origin": "http://localhost:3000", "Access-Control-Request-Method": "GET"},
+        )
+        assert response.headers.get("access-control-allow-origin") == "http://localhost:3000"
 
     def test_input_sanitization(self, client):
         """Test input sanitization."""
@@ -628,4 +614,4 @@ class TestDocumentation:
         if "schemas" in schema["components"]:
             # Verify some expected schemas exist
             schemas = schema["components"]["schemas"]
-            # This depends on your actual schema definitions
+            assert {"ChatRequest", "ChatResponse"} <= schemas.keys()

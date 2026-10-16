@@ -189,7 +189,7 @@ class CityFactsTool(BaseTool):
                 area=100.0,
                 facts=[
                     f"{city} is a city with rich history and culture",
-                    f"The city offers many attractions for visitors",
+                    "The city offers many attractions for visitors",
                     f"{city} has a unique local cuisine and traditions"
                 ]
             )
@@ -241,7 +241,7 @@ class CityFactsTool(BaseTool):
         """Generate interesting facts about a city."""
         facts = [
             f"{city} is located in {country} and has a rich cultural heritage",
-            f"The city offers various attractions for tourists and locals alike",
+            "The city offers various attractions for tourists and locals alike",
             f"{city} has its own unique architectural style and landmarks",
             f"Local cuisine in {city} reflects the regional traditions of {country}",
             f"The city plays an important role in the economy and culture of {country}"

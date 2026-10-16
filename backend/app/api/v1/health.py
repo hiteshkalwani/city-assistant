@@ -14,7 +14,6 @@ from pydantic import BaseModel, Field
 from app.core.config import settings
 from app.core.llm import LLMClient
 from app.utils.http_client import HTTPClient
-from app.utils.exceptions import ErrorResponse
 
 # Create router
 router = APIRouter()

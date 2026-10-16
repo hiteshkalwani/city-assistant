@@ -10,7 +10,6 @@ import asyncio
 import sys
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
-from fastapi.testclient import TestClient
 
 # Add the parent directory to Python path to import app modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -29,17 +28,7 @@ with patch.dict('os.environ', {
     'DEBUG': 'true',
     'ENVIRONMENT': 'test'
 }):
-    from app.main import app
     from app.agents.city_agent import CityInformationAgent
-    from app.tools.weather_tool import WeatherTool
-    from app.tools.time_tool import TimeTool
-    from app.tools.facts_tool import CityFactsTool
-
-
-@pytest.fixture
-def client():
-    """Create a test client for the FastAPI app."""
-    return TestClient(app)
 
 
 @pytest.fixture
@@ -221,7 +210,6 @@ class TestConcurrentRequests:
     def test_concurrent_api_requests(self, client):
         """Test concurrent API requests."""
         import threading
-        import time
         
         results = []
         errors = []
