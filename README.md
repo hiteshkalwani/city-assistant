@@ -4,7 +4,16 @@
 ![Python 3.11](https://img.shields.io/badge/python-3.11-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-An LLM agent API that answers questions about any city: live weather, local time, facts, and a full visit plan. An OpenAI tool-calling agent decides which tools to call. Results are cached in Redis and served by three FastAPI replicas behind nginx.
+An LLM agent that answers questions about any city: live weather, local time, facts, and a full visit plan. An OpenAI tool-calling agent decides which tools to call. Results are cached in Redis and served by three FastAPI replicas behind nginx, with a React UI that shows each tool call as a stop on the route to the answer.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/chat-dark.png" />
+  <img src="docs/screenshots/chat-light.png" alt="City Assistant answering 'Plan my visit to Tokyo': weather, local time and city facts tool calls shown as coloured stops on a route, followed by the answer" width="760" />
+</picture>
+
+<sub>Screenshot of the real UI and API, with the LLM response stubbed so it can be reproduced without an OpenAI key.</sub>
+
+The API on its own:
 
 ```bash
 curl -s localhost/api/v1/chat -H 'Content-Type: application/json' \
@@ -24,15 +33,16 @@ curl -s localhost/api/v1/chat -H 'Content-Type: application/json' \
 
 ```bash
 cp .env.example .env      # set OPENAI_API_KEY; weather/geo keys are optional
-make up                   # nginx + 3 backend replicas + redis on http://localhost
-open http://localhost/docs
+make up                   # UI + API on http://localhost (nginx, 3 backend replicas, redis)
+open http://localhost      # API docs at http://localhost/docs
 ```
 
 Without Docker:
 
 ```bash
 make install
-cd backend && uvicorn app.main:app --reload   # http://localhost:8000
+cd backend && uvicorn app.main:app --reload   # API on http://localhost:8000
+make ui                                       # UI on http://localhost:5173, proxies /api
 ```
 
 ## API
@@ -50,6 +60,7 @@ Message roles are validated (`user`, `assistant`, `system`). Earlier messages ar
 
 See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the request flow, design decisions and known limitations, and **[docs/PRD.md](docs/PRD.md)** for the product requirements.
 
+- **React + TypeScript (Vite)** single-page UI that reads the SSE stream with `fetch`, so it can POST the whole conversation
 - **FastAPI + Pydantic** for validation at the edge
 - **LangChain `AgentExecutor`** with four tools; `plan_city_visit` composes the other three
 - **Redis** cache shared by replicas, TTL per tool, skipped if Redis is down
@@ -59,11 +70,11 @@ See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the request flow, desig
 ## Development
 
 ```bash
-make test    # 145 tests, ~4s, no API keys or network needed
+make test    # backend (145) + frontend tests, no API keys or network needed
 make lint    # ruff
 ```
 
-CI (GitHub Actions) runs lint, tests with coverage, and a Docker build on every push and PR.
+CI (GitHub Actions) runs backend lint and tests with coverage, the frontend tests and type-checked build, and both Docker builds on every push and PR.
 
 ```
 .
@@ -78,8 +89,11 @@ CI (GitHub Actions) runs lint, tests with coverage, and a Docker build on every 
 │   ├── Dockerfile
 │   ├── pyproject.toml   # pytest + ruff config
 │   └── requirements*.txt
-├── nginx/nginx.conf
-├── docs/                # architecture, PRD
+├── frontend/
+│   ├── src/             # App.tsx (chat + route), chat.ts (SSE client) + tests
+│   └── Dockerfile       # builds the UI into the nginx image
+├── nginx/nginx.conf     # serves the UI, proxies /api, unbuffered SSE
+├── docs/                # architecture, PRD, screenshots
 ├── docker-compose.yml
 └── Makefile
 ```

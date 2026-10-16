@@ -280,3 +280,11 @@ def clean_environment():
     yield
     os.environ.clear()
     os.environ.update(original_env)
+
+
+def test_cors_origins_from_comma_separated_env(monkeypatch):
+    """The format used in .env.example must not crash settings at startup."""
+    from app.core.config import Settings
+
+    monkeypatch.setenv("BACKEND_CORS_ORIGINS", "http://localhost:3000,http://localhost:8080")
+    assert Settings().BACKEND_CORS_ORIGINS == ["http://localhost:3000", "http://localhost:8080"]

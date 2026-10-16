@@ -18,12 +18,14 @@ services:
 
   # Nginx Load Balancer
   nginx:
-    image: nginx:alpine
+    # Serves the built frontend and proxies /api to the backend replicas.
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: city-assistant-nginx
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/logs:/var/log/nginx
     depends_on:
       - city-assistant-backend

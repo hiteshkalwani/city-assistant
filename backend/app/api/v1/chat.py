@@ -199,6 +199,10 @@ def summarize_thinking(user_message: str, tool_calls: List[Dict[str, Any]]) -> s
     return ". ".join(parts) + "."
 
 
+# Tells nginx not to buffer, so events reach the browser as they are produced.
+SSE_HEADERS = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
+
+
 def sse(event: ChatStreamResponse) -> str:
     return f"data: {event.model_dump_json()}\n\n"
 
@@ -269,6 +273,7 @@ async def chat(
                 max_tokens=request.max_tokens,
             ),
             media_type="text/event-stream",
+            headers=SSE_HEADERS,
         )
 
     try:
@@ -330,4 +335,5 @@ async def chat_stream(
             country=country,
         ),
         media_type="text/event-stream",
+        headers=SSE_HEADERS,
     )

@@ -1,0 +1,127 @@
+:root {
+  --bg: #f3f6f8;
+  --surface: #ffffff;
+  --ink: #18232c;
+  --muted: #5b6b78;
+  --rule: #d5dde3;
+  --focus: #0068b7;
+  --line-weather: #0079c2;
+  --line-time: #e08a00;
+  --line-facts: #00975a;
+  --line-plan: #8a63b8;
+  --danger: #b42318;
+  color-scheme: light;
+  font-family: 'Overpass', system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121a20;
+    --surface: #1a242c;
+    --ink: #e4eaee;
+    --muted: #93a3af;
+    --rule: #2c3a45;
+    --focus: #5fb4f0;
+    --line-weather: #3fa3e6;
+    --line-time: #f2a93b;
+    --line-facts: #3cc28a;
+    --line-plan: #b190dc;
+    --danger: #ff8a7a;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.page {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100dvh;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.masthead { padding: 2.5rem 0 1.5rem; border-bottom: 1px solid var(--rule); }
+.masthead h1 { margin: 0; font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.masthead p { margin: 0.5rem 0 0; color: var(--muted); max-width: 34rem; }
+
+.log { padding: 1.5rem 0 2rem; }
+
+.empty p { margin: 0 0 0.75rem; color: var(--muted); }
+.suggestions { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.suggestions button {
+  border: 1px solid var(--rule); background: var(--surface); border-radius: 999px;
+  padding: 0.4rem 0.9rem; cursor: pointer;
+}
+.suggestions button:hover { border-color: var(--muted); }
+
+.question { margin: 2rem 0 1rem; font-size: 1.25rem; font-weight: 600; line-height: 1.35; }
+.question:first-child { margin-top: 0; }
+
+/* The route: each tool call is a stop on a vertical line, coloured by tool. */
+.route { list-style: none; margin: 0 0 1rem; padding: 0; }
+.stop {
+  --line: var(--muted);
+  position: relative;
+  padding: 0 0 0.9rem 2.25rem;
+}
+/* The stop marker. */
+.stop::before {
+  content: '';
+  position: absolute; left: 0; top: 0.2rem; z-index: 1;
+  width: 0.85rem; height: 0.85rem; border-radius: 50%;
+  background: var(--surface); border: 4px solid var(--line);
+}
+/* The track to the next stop, in this tool's colour. */
+.stop::after {
+  content: '';
+  position: absolute; left: calc(0.425rem + 2px); top: 0.9rem; bottom: -0.3rem;
+  width: 4px; background: var(--line);
+}
+.stop:last-child::after { display: none; }
+.stop summary { cursor: pointer; display: flex; gap: 0.6rem; align-items: baseline; }
+.stop-name { font-weight: 600; }
+.stop-city { color: var(--muted); }
+.stop pre {
+  margin: 0.5rem 0 0; padding: 0.75rem; max-height: 16rem; overflow: auto;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 6px;
+  font: 0.8rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap;
+}
+.stop-pending { color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) {
+  .stop-pending::before { animation: pulse 1.2s ease-in-out infinite; }
+}
+@keyframes pulse { 50% { transform: scale(0.7); } }
+
+.answer-text { white-space: pre-wrap; max-width: 40rem; }
+.error { color: var(--danger); margin: 0.5rem 0 0; }
+
+.composer {
+  position: sticky; bottom: 0;
+  display: flex; gap: 0.5rem;
+  padding: 1rem 0 1.25rem;
+  background: var(--bg);
+  border-top: 1px solid var(--rule);
+}
+.composer input {
+  flex: 1; min-width: 0;
+  padding: 0.7rem 0.9rem;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 8px;
+}
+.composer button {
+  padding: 0.7rem 1.3rem; border: 0; border-radius: 8px; cursor: pointer;
+  background: var(--ink); color: var(--bg); font-weight: 600;
+}
+.composer button:disabled { opacity: 0.45; cursor: default; }
