@@ -8,7 +8,6 @@ external API integrations and common test scenarios.
 import pytest
 import asyncio
 import sys
-import os
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, Optional
@@ -25,10 +24,19 @@ except ImportError:
     app = FastAPI()
 
 
+FAKE_AGENT_RESULT = {
+    "output": "London is a vibrant city with rich history and culture.",
+    "intermediate_steps": [],
+}
+
+
 @pytest.fixture
 def client():
-    """Create a test client for the FastAPI app."""
-    return TestClient(app)
+    """Test client whose agent never calls OpenAI (tests can still patch deeper)."""
+    from langchain.agents import AgentExecutor
+
+    with patch.object(AgentExecutor, "ainvoke", AsyncMock(return_value=FAKE_AGENT_RESULT)):
+        yield TestClient(app)
 
 
 @pytest.fixture

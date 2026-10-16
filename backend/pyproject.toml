@@ -1,0 +1,31 @@
+[project]
+name = "city-assistant"
+version = "1.0.0"
+description = "LLM agent API that answers city questions with live weather, time and facts tools"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "--strict-markers --tb=short"
+markers = [
+    "slow: slow tests (deselect with '-m \"not slow\"')",
+    "integration: integration tests",
+    "unit: unit tests",
+    "api: API tests",
+    "agent: agent tests",
+    "config: configuration tests",
+    "exception: exception handling tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+# Start with the rules that catch real bugs; widen once the codebase is clean.
+select = ["E9", "F"]

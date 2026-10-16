@@ -113,7 +113,7 @@ class PlanMyCityVisitTool(BaseTool):
                     parameters={"city": city, "country": country},
                     result=f"Error: {str(e)}"
                 ))
-                responses.append(f"📍 **City Information:** Currently unavailable")
+                responses.append("📍 **City Information:** Currently unavailable")
 
             # Step 2: Get current weather
             try:
@@ -133,7 +133,7 @@ class PlanMyCityVisitTool(BaseTool):
                     parameters={"city": city, "country": country},
                     result=f"Error: {str(e)}"
                 ))
-                responses.append(f"🌤️ **Current Weather:** Currently unavailable")
+                responses.append("🌤️ **Current Weather:** Currently unavailable")
 
             # Step 3: Get local time
             try:
@@ -153,7 +153,7 @@ class PlanMyCityVisitTool(BaseTool):
                     parameters={"city": city, "country": country},
                     result=f"Error: {str(e)}"
                 ))
-                responses.append(f"⏰ **Local Time:** Currently unavailable")
+                responses.append("⏰ **Local Time:** Currently unavailable")
 
             # Combine all responses
             combined_response = "\n\n".join(responses)

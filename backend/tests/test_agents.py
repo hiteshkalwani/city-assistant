@@ -8,7 +8,7 @@ including initialization, tool management, memory handling, and agent execution.
 import pytest
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch, call, Mock
+from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from typing import List
 
 # Add the parent directory to Python path to import app modules
@@ -95,7 +95,6 @@ class TestBaseAgent:
             model="gpt-4",
             temperature=0.8,
             max_tokens=2048,
-            streaming=True
         )
 
     @patch('app.agents.base_agent.ChatOpenAI')
@@ -145,7 +144,7 @@ class TestBaseAgent:
         agent.agent_executor.ainvoke.assert_called_once_with({
             "input": "test input",
             "chat_history": []
-        })
+        }, config=None)
         assert result == {"output": "test response"}
 
     @patch('app.agents.base_agent.ChatOpenAI')
@@ -168,7 +167,7 @@ class TestBaseAgent:
             "context": "additional context",
             "chat_history": []
         }
-        agent.agent_executor.ainvoke.assert_called_once_with(expected_input)
+        agent.agent_executor.ainvoke.assert_called_once_with(expected_input, config=None)
         assert result == {"output": "test response"}
 
     @patch('app.agents.base_agent.ChatOpenAI')

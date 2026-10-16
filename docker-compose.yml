@@ -1,12 +1,9 @@
-version: '3.8'
-
 services:
   # Redis Cache Service
   redis:
     image: redis:7-alpine
     container_name: city-assistant-redis
-    ports:
-      - "6379:6379"
+    # No host port: Redis has no password and is only reachable inside the compose network.
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
@@ -25,7 +22,6 @@ services:
     container_name: city-assistant-nginx
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/logs:/var/log/nginx
@@ -38,7 +34,7 @@ services:
 
   # Backend Service with Replicas
   city-assistant-backend:
-    build: ./city-assistant-backend
+    build: ./backend
     environment:
       - DEBUG=false
       - ENVIRONMENT=production
@@ -47,7 +43,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./city-assistant-backend/logs:/app/logs
+      - ./backend/logs:/app/logs
     restart: unless-stopped
     depends_on:
       redis:
@@ -65,7 +61,7 @@ services:
 
   # Development version with hot reload
   city-assistant-dev:
-    build: ./city-assistant-backend
+    build: ./backend
     container_name: city-assistant-dev
     ports:
       - "8001:8000"
@@ -77,8 +73,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./city-assistant-backend:/app
-      - ./city-assistant-backend/logs:/app/logs
+      - ./backend:/app
+      - ./backend/logs:/app/logs
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     restart: unless-stopped
     depends_on:

@@ -93,10 +93,8 @@ def create_application() -> FastAPI:
         request_id = request.headers.get("X-Request-ID", "")
 
         # Log the request
-        logger.info(
-            f"Request: {request.method} {request.url} (ID: {request_id})\n"
-            f"Headers: {dict(request.headers)}"
-        )
+        # Headers are not logged: they can carry credentials.
+        logger.info(f"Request: {request.method} {request.url} (ID: {request_id})")
 
         # Process the request
         response = await call_next(request)
@@ -150,7 +148,7 @@ def create_application() -> FastAPI:
             content=ErrorResponse(
                 error="Internal Server Error",
                 code="internal_server_error",
-                details={"error": str(exc)},
+                details={"error": str(exc)} if settings.DEBUG else None,
             ).model_dump(),
         )
 
